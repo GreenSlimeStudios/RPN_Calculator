@@ -58,13 +58,29 @@ void print_stack()
 {
   display.clearDisplay();
   display.setCursor(0, 0);
-  for (int i = 0; i < stack.size(); ++i)
+  int skip = 0;
+  if (stack.size() > 4)
   {
+    skip = stack.size() - 4;
+  }
+
+  for (int i = skip; i < stack.size(); ++i)
+  {
+    display.print(char(65 + i));
+    display.print(" ");
     display.println(std::to_string(stack[i]).c_str());
     display.drawLine(0, display.getCursorY() + 1, 128, display.getCursorY() + 1, 1);
     display.setCursor(0, display.getCursorY() + 3);
   }
   display.display();
+}
+void push_to_stack()
+{
+  if (current != "")
+  {
+    stack.push_back(std::stold(current));
+    current = "";
+  }
 }
 
 void loop()
@@ -98,8 +114,7 @@ void loop()
     }
     else if (key == 'E' && mode == MODE::INSERT)
     {
-      stack.push_back(std::stold(current));
-      current = "";
+      push_to_stack();
       print_stack();
     }
     else
@@ -118,9 +133,19 @@ void loop()
         switch (key)
         {
         case 'E':
-          current = "";
-          print_stack();
-          mode = MODE::INSERT;
+          if (current != "")
+          {
+
+            current = "";
+            print_stack();
+            mode = MODE::INSERT;
+          }
+          else
+          {
+            stack.pop_back();
+            print_stack();
+            mode = MODE::INSERT;
+          }
           break;
 
         default:
@@ -131,9 +156,13 @@ void loop()
       {
         if (key == '3' || key == '6' || key == '9' || key == 'E')
         {
-          // stack.push_back(std::stold(current));
-          // current = "";
+          push_to_stack();
           long double result;
+          if (stack.size() < 2)
+          {
+            mode = MODE::INSERT;
+            return;
+          }
           switch (key)
           {
           case '3':
