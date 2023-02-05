@@ -68,7 +68,21 @@ void print_stack()
   {
     display.print(char(65 + i));
     display.print(" ");
-    display.println(std::to_string(stack[i]).c_str());
+    // if (stack[i] < 12)
+    std::string num;
+    if (floor(stack[i]) == stack[i])
+    {
+      num = std::to_string(int64_t(stack[i]));
+    }
+    else
+    {
+      num = std::to_string(stack[i]);
+      while (num[num.length() - 1] == '0')
+      {
+        num = num.substr(0, num.size() - 1);
+      }
+    }
+    display.println(num.c_str());
     display.drawLine(0, display.getCursorY() + 1, 128, display.getCursorY() + 1, 1);
     display.setCursor(0, display.getCursorY() + 3);
   }
@@ -117,12 +131,17 @@ void loop()
       push_to_stack();
       print_stack();
     }
+    else if (key == 'J')
+    {
+    }
     else
     {
       if (mode == MODE::INSERT)
       {
         print_stack();
         current += key;
+        display.print(char(65 + stack.size()));
+        display.print(" ");
         display.print(current.c_str());
         // display.print(key);
         Serial.println(key);
@@ -135,26 +154,64 @@ void loop()
         case 'E':
           if (current != "")
           {
-
             current = "";
             print_stack();
-            mode = MODE::INSERT;
           }
           else
           {
-            stack.pop_back();
-            print_stack();
-            mode = MODE::INSERT;
+            if (stack.size() > 0)
+            {
+              stack.pop_back();
+              print_stack();
+            }
           }
           break;
-
+        case '1':
+          push_to_stack();
+          if (stack.size() > 0)
+          {
+            stack.push_back(stack[stack.size() - 1]);
+            print_stack();
+          }
+          break;
         default:
           break;
         }
+        mode = MODE::INSERT;
       }
       else if (mode == MODE::SHIFT)
       {
-        if (key == '3' || key == '6' || key == '9' || key == 'E')
+        if (key == '1' || key == '2' || key == '4' || key == '5')
+        {
+          push_to_stack();
+          if (stack.size() < 1)
+          {
+            mode = MODE::INSERT;
+            return;
+          }
+          long double result;
+          switch (key)
+          {
+          case '1':
+            result = sin(stack[stack.size() - 1] * PI / 180);
+            break;
+          case '2':
+            result = cos(stack[stack.size() - 1] * PI / 180);
+            break;
+          case '4':
+            result = tan(stack[stack.size() - 1] * PI / 180);
+            break;
+          case '5':
+            result = sqrt(stack[stack.size() - 1]);
+            break;
+          default:
+            break;
+          }
+          stack[stack.size() - 1] = result;
+          mode = MODE::INSERT;
+          print_stack();
+        }
+        else if (key == '3' || key == '6' || key == '9' || key == 'E')
         {
           push_to_stack();
           long double result;
