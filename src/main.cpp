@@ -68,24 +68,48 @@ void print_stack()
   {
     display.print(char(65 + i));
     display.print(" ");
-    // if (stack[i] < 12)
+
     std::string num;
-    if (floor(stack[i]) == stack[i])
+    num = std::to_string(stack[i]);
+
+    while (num[num.length() - 1] == '0' || num[num.length() - 1] == '.')
     {
-      num = std::to_string(int64_t(stack[i]));
+      num = num.substr(0, num.size() - 1);
     }
-    else
-    {
-      num = std::to_string(stack[i]);
-      while (num[num.length() - 1] == '0')
-      {
-        num = num.substr(0, num.size() - 1);
-      }
-    }
+    // }
     display.println(num.c_str());
     display.drawLine(0, display.getCursorY() + 1, 128, display.getCursorY() + 1, 1);
     display.setCursor(0, display.getCursorY() + 3);
   }
+  // display.display();
+  if (current != "")
+  {
+    display.print(char(65 + stack.size()));
+    display.print(" ");
+    display.print(current.c_str());
+  }
+
+  int cursorY = display.getCursorY();
+  display.setCursor(0, 56);
+  switch (mode)
+  {
+  case MODE::INSERT:
+    display.print("I");
+    break;
+  case MODE::SHIFT:
+    display.print("S");
+    break;
+  case MODE::ALPHA:
+    display.print("A");
+    break;
+  case MODE::FUNCTION:
+    display.print("F");
+    break;
+
+  default:
+    break;
+  }
+  display.setCursor(0, cursorY);
   display.display();
 }
 void push_to_stack()
@@ -111,6 +135,7 @@ void loop()
         mode = MODE::INSERT;
       else
         mode = MODE::FUNCTION;
+      print_stack();
     }
     else if (key == 'S')
     {
@@ -118,6 +143,7 @@ void loop()
         mode = MODE::INSERT;
       else
         mode = MODE::SHIFT;
+      print_stack();
     }
     else if (key == 'A')
     {
@@ -125,6 +151,7 @@ void loop()
         mode = MODE::INSERT;
       else
         mode = MODE::ALPHA;
+      print_stack();
     }
     else if (key == 'E' && mode == MODE::INSERT)
     {
@@ -138,11 +165,11 @@ void loop()
     {
       if (mode == MODE::INSERT)
       {
-        print_stack();
         current += key;
-        display.print(char(65 + stack.size()));
-        display.print(" ");
-        display.print(current.c_str());
+        // display.print(char(65 + stack.size()));
+        // display.print(" ");
+        // display.print(current.c_str());
+        print_stack();
         // display.print(key);
         Serial.println(key);
         display.display();
@@ -155,14 +182,12 @@ void loop()
           if (current != "")
           {
             current = "";
-            print_stack();
           }
           else
           {
             if (stack.size() > 0)
             {
               stack.pop_back();
-              print_stack();
             }
           }
           break;
@@ -171,13 +196,13 @@ void loop()
           if (stack.size() > 0)
           {
             stack.push_back(stack[stack.size() - 1]);
-            print_stack();
           }
           break;
         default:
           break;
         }
         mode = MODE::INSERT;
+        print_stack();
       }
       else if (mode == MODE::SHIFT)
       {
