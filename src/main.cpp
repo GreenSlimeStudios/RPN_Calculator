@@ -72,11 +72,18 @@ void print_stack()
     std::string num;
     num = std::to_string(stack[i]);
 
-    while (num[num.length() - 1] == '0' || num[num.length() - 1] == '.')
+    if (floor(stack[i]) != stack[i])
     {
-      num = num.substr(0, num.size() - 1);
+      while (num[num.length() - 1] == '0' || num[num.length() - 1] == '.')
+      {
+        num = num.substr(0, num.size() - 1);
+      }
     }
-    // }
+    else
+    {
+      num = num.substr(0, num.size() - 7);
+    }
+
     display.println(num.c_str());
     display.drawLine(0, display.getCursorY() + 1, 128, display.getCursorY() + 1, 1);
     display.setCursor(0, display.getCursorY() + 3);
