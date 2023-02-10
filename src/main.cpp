@@ -24,6 +24,7 @@ byte colPins[ROWS] = {26, 18, 19, 23}; // connect to the row pinouts of the keyp
 byte rowPins[COLS] = {5, 16, 33, 17};  // connect to the column pinouts of the keypad
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+int repeat = 1;
 
 enum MODE
 {
@@ -31,11 +32,13 @@ enum MODE
   SHIFT,
   ALPHA,
   FUNCTION,
+  REPEAT_SET,
 };
 
 MODE mode = MODE::INSERT;
 std::vector<long double> stack = {};
 std::string current = "";
+std::string r_current = "";
 
 void setup()
 {
@@ -116,16 +119,35 @@ void print_stack()
   default:
     break;
   }
+  if (repeat != 1)
+  {
+    display.print(" ");
+    display.print(repeat);
+    display.print("r");
+  }
   display.setCursor(0, cursorY);
   display.display();
 }
 void push_to_stack()
 {
-  if (current != "")
+  if (current != "" && current != ".")
   {
     stack.push_back(std::stold(current));
     current = "";
   }
+}
+void print_repeat_set()
+{
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.println("SET REPEAT");
+  display.drawLine(0, display.getCursorY() + 1, 128, display.getCursorY() + 1, 1);
+  display.setCursor(0, display.getCursorY() + 3);
+  // display.print("R: ");
+  // display.setTextColor(0, 1);
+  display.print(r_current.c_str());
+  // display.setTextColor(1, 0);
+  display.display();
 }
 
 void loop()
@@ -136,7 +158,7 @@ void loop()
 
   if (key)
   {
-    if (key == 'F')
+    if (key == 'F' && mode != MODE::REPEAT_SET)
     {
       if (mode == MODE::FUNCTION)
         mode = MODE::INSERT;
@@ -144,7 +166,7 @@ void loop()
         mode = MODE::FUNCTION;
       print_stack();
     }
-    else if (key == 'S')
+    else if (key == 'S' && mode != MODE::REPEAT_SET)
     {
       if (mode == MODE::SHIFT)
         mode = MODE::INSERT;
@@ -152,7 +174,7 @@ void loop()
         mode = MODE::SHIFT;
       print_stack();
     }
-    else if (key == 'A')
+    else if (key == 'A' && mode != MODE::REPEAT_SET)
     {
       if (mode == MODE::ALPHA)
         mode = MODE::INSERT;
@@ -165,13 +187,17 @@ void loop()
       push_to_stack();
       print_stack();
     }
-    else if (key == 'J')
-    {
-    }
+    // else if (key == 'J')
+    // {
+    // }
     else
     {
       if (mode == MODE::INSERT)
       {
+        if (key == 'J')
+        {
+          return;
+        }
         current += key;
         // display.print(char(65 + stack.size()));
         // display.print(" ");
@@ -181,10 +207,14 @@ void loop()
         Serial.println(key);
         display.display();
       }
-      if (mode == MODE::ALPHA)
+      else if (mode == MODE::ALPHA)
       {
         switch (key)
         {
+        case 'J':
+          mode = REPEAT_SET;
+          print_repeat_set();
+          break;
         case 'E':
           if (current != "")
           {
@@ -197,84 +227,123 @@ void loop()
               stack.pop_back();
             }
           }
+          mode = MODE::INSERT;
+          print_stack();
           break;
         case '1':
+          for (int i = 0; i < repeat; ++i)
+          {
+            push_to_stack();
+            if (stack.size() > 0)
+            {
+              stack.push_back(stack[stack.size() - 1]);
+            }
+            mode = MODE::INSERT;
+            print_stack();
+          }
+          break;
+        case '2':
           push_to_stack();
           if (stack.size() > 0)
           {
-            stack.push_back(stack[stack.size() - 1]);
+            stack[stack.size() - 1] = -stack[stack.size() - 1];
           }
+          mode = MODE::INSERT;
+          print_stack();
           break;
         default:
           break;
         }
-        mode = MODE::INSERT;
-        print_stack();
       }
       else if (mode == MODE::SHIFT)
       {
         if (key == '1' || key == '2' || key == '4' || key == '5')
         {
-          push_to_stack();
-          if (stack.size() < 1)
+          for (int i = 0; i < repeat; ++i)
           {
+            push_to_stack();
+            if (stack.size() < 1)
+            {
+              mode = MODE::INSERT;
+              print_stack();
+              return;
+            }
+            long double result;
+            switch (key)
+            {
+            case '1':
+              result = sin(stack[stack.size() - 1] * PI / 180);
+              break;
+            case '2':
+              result = cos(stack[stack.size() - 1] * PI / 180);
+              break;
+            case '4':
+              result = tan(stack[stack.size() - 1] * PI / 180);
+              break;
+            case '5':
+              result = sqrt(stack[stack.size() - 1]);
+              break;
+            default:
+              break;
+            }
+            stack[stack.size() - 1] = result;
             mode = MODE::INSERT;
-            return;
+            print_stack();
           }
-          long double result;
-          switch (key)
-          {
-          case '1':
-            result = sin(stack[stack.size() - 1] * PI / 180);
-            break;
-          case '2':
-            result = cos(stack[stack.size() - 1] * PI / 180);
-            break;
-          case '4':
-            result = tan(stack[stack.size() - 1] * PI / 180);
-            break;
-          case '5':
-            result = sqrt(stack[stack.size() - 1]);
-            break;
-          default:
-            break;
-          }
-          stack[stack.size() - 1] = result;
-          mode = MODE::INSERT;
-          print_stack();
         }
         else if (key == '3' || key == '6' || key == '9' || key == 'E')
         {
-          push_to_stack();
-          long double result;
-          if (stack.size() < 2)
+          for (int i = 0; i < repeat; ++i)
           {
+            push_to_stack();
+            long double result;
+            if (stack.size() < 2)
+            {
+              mode = MODE::INSERT;
+              return;
+            }
+            switch (key)
+            {
+            case '3':
+              result = stack[stack.size() - 2] + stack[stack.size() - 1];
+              break;
+            case '6':
+              result = stack[stack.size() - 2] - stack[stack.size() - 1];
+              break;
+            case '9':
+              result = stack[stack.size() - 2] * stack[stack.size() - 1];
+              break;
+            case 'E':
+              result = stack[stack.size() - 2] / stack[stack.size() - 1];
+              break;
+            default:
+              result = 0;
+              break;
+            }
+            stack.pop_back();
+            stack.pop_back();
+            stack.push_back(result);
             mode = MODE::INSERT;
-            return;
+            print_stack();
           }
-          switch (key)
+        }
+      }
+      else if (mode == REPEAT_SET)
+      {
+        if (key == '1' || key == '2' || key == '3' || key == '4' || key == '5' || key == '6' || key == '7' || key == '8' || key == '9' || key == '0')
+        {
+          r_current += key;
+          print_repeat_set();
+        }
+        if (key == 'E')
+        {
+          if (r_current != "" && r_current != "0")
           {
-          case '3':
-            result = stack[stack.size() - 2] + stack[stack.size() - 1];
-            break;
-          case '6':
-            result = stack[stack.size() - 2] - stack[stack.size() - 1];
-            break;
-          case '9':
-            result = stack[stack.size() - 2] * stack[stack.size() - 1];
-            break;
-          case 'E':
-            result = stack[stack.size() - 2] / stack[stack.size() - 1];
-            break;
-          default:
-            result = 0;
-            break;
+            repeat = std::stoi(r_current);
+            r_current = "";
+            mode = MODE::INSERT;
+            print_stack();
           }
-          stack.pop_back();
-          stack.pop_back();
-          stack.push_back(result);
-          mode = MODE::INSERT;
-          print_stack();
         }
       }
     }
