@@ -266,10 +266,13 @@ void loop()
         {
           return;
         }
-        if (key == 'D' && current.length() > 0)
+        if (key == 'D')
         {
-          current = current.substr(0, current.length() - 1);
-          print_stack();
+          if (current.length() > 0)
+          {
+            current = current.substr(0, current.length() - 1);
+            print_stack();
+          }
           return;
         }
         current += key;
