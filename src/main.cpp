@@ -100,7 +100,7 @@ void print_stack()
     int multiplyer = 0;
     std::string addition = "";
 
-    if (nur < 0.0001)
+    if (nur < 0.0001 && nur > 0)
     {
       while (nur < 1)
       {
@@ -115,6 +115,24 @@ void print_stack()
       {
         nur /= 10;
         multiplyer += 1;
+      }
+      addition = "*10^" + std::to_string(multiplyer);
+    }
+    if (nur < -1000000)
+    {
+      while (nur <= -10)
+      {
+        nur /= 10;
+        multiplyer += 1;
+      }
+      addition = "*10^" + std::to_string(multiplyer);
+    }
+    if (nur > -0.0001 && nur < 0)
+    {
+      while (nur > -1)
+      {
+        nur *= 10;
+        multiplyer -= 1;
       }
       addition = "*10^" + std::to_string(multiplyer);
     }
