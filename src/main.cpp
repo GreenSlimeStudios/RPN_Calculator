@@ -102,14 +102,14 @@ void print_stack()
 
     if (nur < 0.0001 && nur > 0)
     {
-      while (nur < 1)
+      while (nur < 0.9999999)
       {
         nur *= 10;
         multiplyer -= 1;
       }
       addition = "*10^" + std::to_string(multiplyer);
     }
-    if (nur > 1000000)
+    else if (nur > 1000000)
     {
       while (nur >= 10)
       {
@@ -118,7 +118,7 @@ void print_stack()
       }
       addition = "*10^" + std::to_string(multiplyer);
     }
-    if (nur < -1000000)
+    else if (nur < -1000000)
     {
       while (nur <= -10)
       {
@@ -127,9 +127,9 @@ void print_stack()
       }
       addition = "*10^" + std::to_string(multiplyer);
     }
-    if (nur > -0.0001 && nur < 0)
+    else if (nur > -0.0001 && nur < 0)
     {
-      while (nur > -1)
+      while (nur > -0.999999999)
       {
         nur *= 10;
         multiplyer -= 1;
@@ -262,8 +262,21 @@ void loop()
     {
       if (mode == MODE::INSERT)
       {
-        if (key == 'J')
+        if (key == 'J' || key == 'X')
         {
+          return;
+        }
+        if (key == '-')
+        {
+          if (current.substr(0, 1) == "-")
+          {
+            current = current.substr(1);
+          }
+          else
+          {
+            current = "-" + current;
+          }
+          print_stack();
           return;
         }
         if (key == 'D')
@@ -343,6 +356,7 @@ void loop()
           {
             stack[stack.size() - 1] = pow(stack[stack.size() - 1], repeat);
           }
+          repeat = 1;
           mode = MODE::INSERT;
           print_stack();
           break;
@@ -440,21 +454,16 @@ void loop()
         }
         else if (key == '-')
         {
-          if (r_current != "")
+          if (r_current.substr(0, 1) == "-")
           {
-            if (r_current.substr(0, 1) == "-")
-            {
-              Serial.println("one");
-              r_current = r_current.substr(1);
-              print_repeat_set();
-            }
-            else
-            {
-              Serial.println("two");
-              r_current = "-" + r_current;
-              Serial.println(r_current.c_str());
-              print_repeat_set();
-            }
+            r_current = r_current.substr(1);
+            print_repeat_set();
+          }
+          else
+          {
+            r_current = "-" + r_current;
+            Serial.println(r_current.c_str());
+            print_repeat_set();
           }
         }
         else if (key == 'E')
@@ -462,6 +471,13 @@ void loop()
           if (r_current != "" && r_current != "0")
           {
             repeat = std::stoi(r_current);
+            r_current = "";
+            mode = MODE::INSERT;
+            print_stack();
+          }
+          else
+          {
+            repeat = 1;
             r_current = "";
             mode = MODE::INSERT;
             print_stack();
