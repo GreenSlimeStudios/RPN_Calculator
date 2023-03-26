@@ -96,7 +96,31 @@ void print_stack()
     std::string num;
     num = std::to_string(stack[i]);
 
-    if (floor(stack[i]) != stack[i])
+    long double nur = stack[i];
+    int multiplyer = 0;
+    std::string addition = "";
+
+    if (nur < 0.0001)
+    {
+      while (nur < 1)
+      {
+        nur *= 10;
+        multiplyer -= 1;
+      }
+      addition = "*10^" + std::to_string(multiplyer);
+    }
+    if (nur > 1000000)
+    {
+      while (nur >= 10)
+      {
+        nur /= 10;
+        multiplyer += 1;
+      }
+      addition = "*10^" + std::to_string(multiplyer);
+    }
+    num = std::to_string(nur);
+
+    if (floor(nur) != nur)
     {
       while (num[num.length() - 1] == '0' || num[num.length() - 1] == '.')
       {
@@ -107,6 +131,7 @@ void print_stack()
     {
       num = num.substr(0, num.size() - 7);
     }
+    num += addition;
 
     display.println(num.c_str());
     display.drawLine(0, display.getCursorY() + 1, SCREEN_WIDTH, display.getCursorY() + 1, ST77XX_WHITE);
