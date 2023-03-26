@@ -23,8 +23,8 @@ Adafruit_ST7789 display = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
 const byte ROWS = 6; // four rows
 const byte COLS = 4; // three columns
 char keys[ROWS][COLS] = {
-    {'X', 'X', 'X', 'X'},
-    {'X', 'X', 'X', 'X'},
+    {'X', 'X', 'X', 'D'},
+    {'X', 'X', 'X', '-'},
     {'F', '1', '2', '3'},
     {'S', '4', '5', '6'},
     {'A', '7', '8', '9'},
@@ -266,6 +266,12 @@ void loop()
         {
           return;
         }
+        if (key == 'D' && current.length() > 0)
+        {
+          current = current.substr(0, current.length() - 1);
+          print_stack();
+          return;
+        }
         current += key;
         // display.print(char(65 + stack.size()));
         // display.print(" ");
@@ -315,6 +321,24 @@ void loop()
           if (stack.size() > 0)
           {
             stack[stack.size() - 1] = -stack[stack.size() - 1];
+          }
+          mode = MODE::INSERT;
+          print_stack();
+          break;
+        case '5':
+          push_to_stack();
+          if (stack.size() > 0)
+          {
+            stack[stack.size() - 1] = 1 / stack[stack.size() - 1];
+          }
+          mode = MODE::INSERT;
+          print_stack();
+          break;
+        case '9':
+          push_to_stack();
+          if (stack.size() > 0)
+          {
+            stack[stack.size() - 1] = pow(stack[stack.size() - 1], repeat);
           }
           mode = MODE::INSERT;
           print_stack();
@@ -403,7 +427,34 @@ void loop()
           r_current += key;
           print_repeat_set();
         }
-        if (key == 'E')
+        else if (key == 'D')
+        {
+          if (r_current.length() > 0)
+          {
+            r_current = r_current.substr(0, r_current.length() - 1);
+            print_repeat_set();
+          }
+        }
+        else if (key == '-')
+        {
+          if (r_current != "")
+          {
+            if (r_current.substr(0, 1) == "-")
+            {
+              Serial.println("one");
+              r_current = r_current.substr(1);
+              print_repeat_set();
+            }
+            else
+            {
+              Serial.println("two");
+              r_current = "-" + r_current;
+              Serial.println(r_current.c_str());
+              print_repeat_set();
+            }
+          }
+        }
+        else if (key == 'E')
         {
           if (r_current != "" && r_current != "0")
           {
