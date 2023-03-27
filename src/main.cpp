@@ -38,6 +38,7 @@ enum MODE
   ALPHA,
   FUNCTION,
   REPEAT_SET,
+  GRAPH,
 };
 
 MODE mode = MODE::INSERT;
@@ -188,10 +189,9 @@ void print_repeat_set()
   display.println("SET REPEAT");
   display.drawLine(0, display.getCursorY() + 1, SCREEN_WIDTH, display.getCursorY() + 1, ST77XX_WHITE);
   display.setCursor(0, display.getCursorY() + 3);
-  // display.setTextColor(0, 1);
+  // display.setTextColor(ST77XX_BLUE);
   display.print(r_current.c_str());
-  // display.setTextColor(1, 0);
-  // display.display();
+  // display.setTextColor(ST77XX_WHITE);
 }
 
 void loop()
@@ -329,6 +329,24 @@ void loop()
           if (stack.size() > 0)
           {
             stack[stack.size() - 1] = pow(stack[stack.size() - 1], repeat);
+          }
+          repeat = 1;
+          mode = MODE::INSERT;
+          print_stack();
+          break;
+        case '4':
+          push_to_stack();
+          if (stack.size() > 0)
+          {
+            if (repeat == 1)
+            {
+
+              stack[stack.size() - 1] = log10(stack[stack.size() - 1]);
+            }
+            else
+            {
+              stack[stack.size() - 1] = log2(stack[stack.size() - 1]) / log2(repeat);
+            }
           }
           repeat = 1;
           mode = MODE::INSERT;
