@@ -2,7 +2,6 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
 #include <Adafruit_ST7789.h>
 #include <Keypad.h>
 #include <vector>
@@ -15,9 +14,6 @@ const int SC = 17;
 
 const int SCREEN_HEIGHT = 240;
 const int SCREEN_WIDTH = 240;
-#define OLED_RESET -1       // Reset pin # (or -1 if sharing Arduino reset pin)
-#define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
-// Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 Adafruit_ST7789 display = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
 
 const byte ROWS = 6; // four rows
@@ -49,37 +45,24 @@ std::vector<long double> stack = {};
 std::string current = "";
 std::string r_current = "";
 
+void print_splash()
+{
+  display.fillScreen(ST77XX_BLACK);
+  display.println("KARP CALCULATOR");
+}
 void setup()
 {
   Serial.begin(921600);
-  Serial.println(F("wha the wha"));
-  // put your setup code here, to run once:
-  // if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
-  // {
-  //   Serial.println(F("SSD1306 allocation failed"));
-  //   for (;;)
-  //   {
-  //   }
-  // }
   display.init(240, 240);
   display.setRotation(2);
   display.fillScreen(ST77XX_BLACK);
   display.drawRect(120, 120, 240, 240, ST77XX_BLACK);
   display.setTextColor(ST77XX_WHITE);
   display.setTextSize(2);
-  // for (;;)
-  // {
-  // display.print("aaaaa");
-  // Serial.println(F("wha the heck"));
-  // }
-  // display.clearDisplay();
-  // display.setTextColor(1);
-  // display.println("wha the heck");
-  // display.display();
+  print_splash();
 }
 void print_stack()
 {
-  // display.clearDisplay();
   display.fillScreen(ST77XX_BLACK);
   display.setCursor(0, 0);
   int skip = 0;
@@ -107,7 +90,7 @@ void print_stack()
         nur *= 10;
         multiplyer -= 1;
       }
-      addition = "*10^" + std::to_string(multiplyer);
+      addition = "x10^" + std::to_string(multiplyer);
     }
     else if (nur > 1000000)
     {
@@ -116,7 +99,7 @@ void print_stack()
         nur /= 10;
         multiplyer += 1;
       }
-      addition = "*10^" + std::to_string(multiplyer);
+      addition = "x10^" + std::to_string(multiplyer);
     }
     else if (nur < -1000000)
     {
@@ -125,7 +108,7 @@ void print_stack()
         nur /= 10;
         multiplyer += 1;
       }
-      addition = "*10^" + std::to_string(multiplyer);
+      addition = "x10^" + std::to_string(multiplyer);
     }
     else if (nur > -0.0001 && nur < 0)
     {
@@ -134,7 +117,7 @@ void print_stack()
         nur *= 10;
         multiplyer -= 1;
       }
-      addition = "*10^" + std::to_string(multiplyer);
+      addition = "x10^" + std::to_string(multiplyer);
     }
     num = std::to_string(nur);
 
@@ -155,7 +138,6 @@ void print_stack()
     display.drawLine(0, display.getCursorY() + 1, SCREEN_WIDTH, display.getCursorY() + 1, ST77XX_WHITE);
     display.setCursor(0, display.getCursorY() + 3);
   }
-  // display.display();
   if (current != "")
   {
     display.print(char(65 + stack.size()));
@@ -190,7 +172,6 @@ void print_stack()
     display.print("r");
   }
   display.setCursor(0, cursorY);
-  // display.display();
 }
 void push_to_stack()
 {
@@ -202,13 +183,11 @@ void push_to_stack()
 }
 void print_repeat_set()
 {
-  // display.clearDisplay();
   display.fillScreen(ST77XX_BLACK);
   display.setCursor(0, 0);
   display.println("SET REPEAT");
   display.drawLine(0, display.getCursorY() + 1, SCREEN_WIDTH, display.getCursorY() + 1, ST77XX_WHITE);
   display.setCursor(0, display.getCursorY() + 3);
-  // display.print("R: ");
   // display.setTextColor(0, 1);
   display.print(r_current.c_str());
   // display.setTextColor(1, 0);
@@ -289,13 +268,8 @@ void loop()
           return;
         }
         current += key;
-        // display.print(char(65 + stack.size()));
-        // display.print(" ");
-        // display.print(current.c_str());
         print_stack();
-        // display.print(key);
         Serial.println(key);
-        // display.display();
       }
       else if (mode == MODE::ALPHA)
       {
@@ -368,8 +342,6 @@ void loop()
       {
         if (key == '1' || key == '2' || key == '4' || key == '5')
         {
-          // for (int i = 0; i < repeat; ++i)
-          // {
           push_to_stack();
           if (stack.size() < 1)
           {
