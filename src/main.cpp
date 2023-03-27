@@ -19,8 +19,8 @@ Adafruit_ST7789 display = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
 const byte ROWS = 6; // four rows
 const byte COLS = 4; // three columns
 char keys[ROWS][COLS] = {
-    {'X', 'X', 'X', 'D'},
-    {'X', 'X', 'X', '-'},
+    {'X', 'X', '^', 'D'},
+    {'X', 'X', 'v', '-'},
     {'F', '1', '2', '3'},
     {'S', '4', '5', '6'},
     {'A', '7', '8', '9'},
@@ -30,6 +30,8 @@ byte rowPins[ROWS] = {33, 22, 21, 4, 13, 12}; // connect to the column pinouts o
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 int repeat = 1;
+char pre_key = 'E';
+int index_offset = 1;
 
 enum MODE
 {
@@ -202,6 +204,11 @@ void loop()
 
   if (key)
   {
+    // if (key != '^' && key != 'v')
+    // {
+    //   pre_key = 'X';
+    // }
+
     if (key == 'F' && mode != MODE::REPEAT_SET)
     {
       if (mode == MODE::FUNCTION)
@@ -245,7 +252,58 @@ void loop()
         {
           return;
         }
-        if (key == '-')
+        else if (key == '^')
+        {
+          if (pre_key != '^' && pre_key != 'v')
+          {
+            index_offset = 1;
+          }
+          if (pre_key == 'v')
+          {
+            index_offset++;
+          }
+          if (index_offset > stack.size() - 1)
+          {
+            return;
+          }
+          push_to_stack();
+          Serial.print("index: ");
+          Serial.println(index_offset);
+          long double temp = stack[stack.size() - 1 - index_offset];
+          stack[stack.size() - 1 - index_offset] = stack[stack.size() - index_offset];
+          stack[stack.size() - index_offset] = temp;
+          index_offset += 1;
+          pre_key = '^';
+          Serial.print("index: ");
+          Serial.println(index_offset);
+          print_stack();
+          return;
+        }
+        else if (key == 'v')
+        {
+          if (pre_key != 'v' && pre_key != '^')
+          {
+            index_offset = 0;
+          }
+          if (pre_key == '^')
+          {
+            index_offset--;
+          }
+          if (index_offset < 1)
+          {
+            return;
+          }
+          push_to_stack();
+          long double temp = stack[stack.size() - index_offset];
+          stack[stack.size() - index_offset] = stack[stack.size() - 1 - index_offset];
+          stack[stack.size() - 1 - index_offset] = temp;
+
+          print_stack();
+          pre_key = 'v';
+          index_offset -= 1;
+          return;
+        }
+        else if (key == '-')
         {
           if (current.substr(0, 1) == "-")
           {
@@ -258,7 +316,7 @@ void loop()
           print_stack();
           return;
         }
-        if (key == 'D')
+        else if (key == 'D')
         {
           if (current.length() > 0)
           {
@@ -267,9 +325,12 @@ void loop()
           }
           return;
         }
-        current += key;
-        print_stack();
-        Serial.println(key);
+        else
+        {
+          current += key;
+          print_stack();
+          Serial.println(key);
+        }
       }
       else if (mode == MODE::ALPHA)
       {
@@ -352,6 +413,13 @@ void loop()
           mode = MODE::INSERT;
           print_stack();
           break;
+        case 'D':
+          push_to_stack();
+          stack.clear();
+          mode = MODE::INSERT;
+          print_stack();
+          break;
+
         default:
           break;
         }
@@ -475,5 +543,6 @@ void loop()
         }
       }
     }
+    pre_key = key;
   }
 }
