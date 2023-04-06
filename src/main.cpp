@@ -64,6 +64,13 @@ void setup()
   display.setTextSize(2);
   print_splash();
 }
+void stupid()
+{
+  display.fillRect(20, 100, 200, 35, ST77XX_RED);
+  display.setCursor(25, 110);
+  display.print("STUPID N***** !!");
+  delay(500);
+}
 void print_stack()
 {
   display.fillScreen(ST77XX_BLACK);
@@ -176,12 +183,32 @@ void print_stack()
   }
   display.setCursor(0, cursorY);
 }
+char valid_chars[10] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
+bool check_input(std::string *cur)
+{
+  if (*cur == "")
+  {
+    return false;
+  }
+  for (int i = 0; i < sizeof(valid_chars) / sizeof('1'); i++)
+  {
+    if (cur->find(valid_chars[i]) != std::string::npos)
+    {
+      return true;
+    }
+  }
+  return false;
+}
 void push_to_stack()
 {
-  if (current != "" && current != ".")
+  if (check_input(&current))
   {
     stack.push_back(std::stold(current));
     current = "";
+  }
+  else if (current != "")
+  {
+    stupid();
   }
 }
 void print_repeat_set()
@@ -325,6 +352,15 @@ void loop()
           }
           return;
         }
+        else if (key == '.')
+        {
+          if (current.find('.') == std::string::npos)
+          {
+            current += key;
+            print_stack();
+            Serial.println(key);
+          }
+        }
         else
         {
           current += key;
@@ -337,6 +373,7 @@ void loop()
         switch (key)
         {
         case 'J':
+          push_to_stack();
           mode = REPEAT_SET;
           print_repeat_set();
           break;
@@ -467,6 +504,7 @@ void loop()
             if (stack.size() < 2)
             {
               mode = MODE::INSERT;
+              print_stack();
               return;
             }
             switch (key)
@@ -481,7 +519,17 @@ void loop()
               result = stack[stack.size() - 2] * stack[stack.size() - 1];
               break;
             case 'E':
-              result = stack[stack.size() - 2] / stack[stack.size() - 1];
+              if (stack.back() != 0)
+              {
+                result = stack[stack.size() - 2] / stack[stack.size() - 1];
+              }
+              else
+              {
+                mode = MODE::INSERT;
+                stupid();
+                print_stack();
+                return;
+              }
               break;
             default:
               result = 0;
