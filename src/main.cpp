@@ -40,6 +40,7 @@ enum MODE
   ALPHA,
   FUNCTION,
   REPEAT_SET,
+  CONST_SELECT,
   GRAPH,
 };
 
@@ -224,6 +225,23 @@ void print_repeat_set()
   display.print(r_current.c_str());
   // display.setTextColor(ST77XX_WHITE);
 }
+void print_const_set()
+{
+  display.fillScreen(ST77XX_BLACK);
+  display.setCursor(5, 5);
+  display.println("1:PI");
+  display.setCursor(70, 5);
+  display.println("2:e");
+  display.setCursor(130, 5);
+  display.println("3:p");
+  display.setCursor(190, 5);
+  display.println("4:G");
+
+  display.drawLine(60, 0, 60, 240, ST77XX_WHITE);
+  display.drawLine(120, 0, 120, 240, ST77XX_WHITE);
+  display.drawLine(180, 0, 180, 240, ST77XX_WHITE);
+  display.drawLine(0, 25, 240, 25, ST77XX_WHITE);
+}
 
 void loop()
 {
@@ -386,6 +404,19 @@ void loop()
             print_stack();
           }
           break;
+        case '.':
+          if (push_to_stack())
+          {
+            mode = MODE::CONST_SELECT;
+            print_const_set();
+          }
+          else
+          {
+            mode = MODE::INSERT;
+            print_stack();
+          }
+          break;
+
         case 'E':
           if (current != "")
           {
@@ -641,6 +672,33 @@ void loop()
             print_stack();
           }
         }
+      }
+      else if (mode == MODE::CONST_SELECT)
+      {
+        switch (key)
+        {
+        case 'E':
+          mode = MODE::INSERT;
+          print_stack();
+          break;
+        case '1':
+          stack.push_back(PI);
+          break;
+        case '2':
+          stack.push_back(0.000000000000000000160217662);
+          break;
+        case '3':
+          stack.push_back(0.0000000000000000000000016726);
+          break;
+        case '4':
+          stack.push_back(0.000000000066743);
+          break;
+
+        default:
+          break;
+        }
+        mode = MODE::INSERT;
+        print_stack();
       }
     }
     pre_key = key;
