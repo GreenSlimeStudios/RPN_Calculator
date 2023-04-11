@@ -68,7 +68,7 @@ void stupid()
 {
   display.fillRect(20, 100, 200, 35, ST77XX_RED);
   display.setCursor(25, 110);
-  display.print("STUPID N***** !!");
+  display.print("SYNTAX ERROR !!!");
   delay(500);
 }
 void print_stack()
@@ -426,7 +426,14 @@ void loop()
           push_to_stack();
           if (stack.size() > 0)
           {
-            stack[stack.size() - 1] = pow(stack[stack.size() - 1], repeat);
+            if (repeat == 1)
+            {
+              stack.back() = pow(stack.back(), 2);
+            }
+            else
+            {
+              stack[stack.size() - 1] = pow(stack[stack.size() - 1], repeat);
+            }
           }
           repeat = 1;
           mode = MODE::INSERT;
@@ -436,14 +443,20 @@ void loop()
           push_to_stack();
           if (stack.size() > 0)
           {
-            if (repeat == 1)
+            if (stack.back() != 0)
             {
-
-              stack[stack.size() - 1] = log10(stack[stack.size() - 1]);
+              if (repeat == 1)
+              {
+                stack[stack.size() - 1] = log10(stack[stack.size() - 1]);
+              }
+              else
+              {
+                stack[stack.size() - 1] = log2(stack[stack.size() - 1]) / log2(repeat);
+              }
             }
             else
             {
-              stack[stack.size() - 1] = log2(stack[stack.size() - 1]) / log2(repeat);
+              stupid();
             }
           }
           repeat = 1;
@@ -485,7 +498,14 @@ void loop()
             result = tan(stack[stack.size() - 1] * PI / 180);
             break;
           case '5':
-            result = sqrt(stack[stack.size() - 1]);
+            if (repeat == 1)
+            {
+              result = sqrt(stack[stack.size() - 1]);
+            }
+            else
+            {
+              result = pow(stack.back(), (1.0 / repeat));
+            }
             break;
           default:
             break;
