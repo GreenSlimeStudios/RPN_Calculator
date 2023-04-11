@@ -199,7 +199,7 @@ bool check_input(std::string *cur)
   }
   return false;
 }
-void push_to_stack()
+bool push_to_stack()
 {
   if (check_input(&current))
   {
@@ -209,7 +209,9 @@ void push_to_stack()
   else if (current != "")
   {
     stupid();
+    return false;
   }
+  return true;
 }
 void print_repeat_set()
 {
@@ -373,9 +375,16 @@ void loop()
         switch (key)
         {
         case 'J':
-          push_to_stack();
-          mode = REPEAT_SET;
-          print_repeat_set();
+          if (push_to_stack())
+          {
+            mode = MODE::REPEAT_SET;
+            print_repeat_set();
+          }
+          else
+          {
+            mode = MODE::INSERT;
+            print_stack();
+          }
           break;
         case 'E':
           if (current != "")
@@ -395,77 +404,90 @@ void loop()
         case '1':
           for (int i = 0; i < repeat; ++i)
           {
-            push_to_stack();
-            if (stack.size() > 0)
+            if (push_to_stack())
             {
-              stack.push_back(stack[stack.size() - 1]);
+              if (stack.size() > 0)
+              {
+                stack.push_back(stack[stack.size() - 1]);
+              }
             }
             mode = MODE::INSERT;
             print_stack();
           }
           break;
         case '2':
-          push_to_stack();
-          if (stack.size() > 0)
+          if (push_to_stack())
           {
-            stack[stack.size() - 1] = -stack[stack.size() - 1];
+            if (stack.size() > 0)
+            {
+              stack[stack.size() - 1] = -stack[stack.size() - 1];
+            }
           }
           mode = MODE::INSERT;
           print_stack();
           break;
         case '5':
-          push_to_stack();
-          if (stack.size() > 0)
+          if (push_to_stack())
           {
-            stack[stack.size() - 1] = 1 / stack[stack.size() - 1];
+            if (stack.size() > 0)
+            {
+              stack[stack.size() - 1] = 1 / stack[stack.size() - 1];
+            }
           }
           mode = MODE::INSERT;
           print_stack();
           break;
         case '9':
-          push_to_stack();
-          if (stack.size() > 0)
+          if (push_to_stack())
           {
-            if (repeat == 1)
+            if (stack.size() > 0)
             {
-              stack.back() = pow(stack.back(), 2);
+              if (repeat == 1)
+              {
+                stack.back() = pow(stack.back(), 2);
+              }
+              else
+              {
+                stack[stack.size() - 1] = pow(stack[stack.size() - 1], repeat);
+              }
             }
-            else
-            {
-              stack[stack.size() - 1] = pow(stack[stack.size() - 1], repeat);
-            }
+            repeat = 1;
           }
-          repeat = 1;
           mode = MODE::INSERT;
           print_stack();
           break;
         case '4':
-          push_to_stack();
-          if (stack.size() > 0)
+          if (push_to_stack())
           {
-            if (stack.back() != 0)
+
+            if (stack.size() > 0)
             {
-              if (repeat == 1)
+              if (stack.back() != 0)
               {
-                stack[stack.size() - 1] = log10(stack[stack.size() - 1]);
+                if (repeat == 1)
+                {
+                  stack[stack.size() - 1] = log10(stack[stack.size() - 1]);
+                }
+                else
+                {
+                  stack[stack.size() - 1] = log2(stack[stack.size() - 1]) / log2(repeat);
+                }
               }
               else
               {
-                stack[stack.size() - 1] = log2(stack[stack.size() - 1]) / log2(repeat);
+                stupid();
               }
             }
-            else
-            {
-              stupid();
-            }
+            repeat = 1;
           }
-          repeat = 1;
           mode = MODE::INSERT;
           print_stack();
           break;
         case 'D':
-          push_to_stack();
-          stack.clear();
+          if (push_to_stack())
+          {
+            stack.clear();
+          }
           mode = MODE::INSERT;
           print_stack();
           break;
@@ -478,7 +500,12 @@ void loop()
       {
         if (key == '1' || key == '2' || key == '4' || key == '5')
         {
-          push_to_stack();
+          if (push_to_stack() == false)
+          {
+            mode = MODE::INSERT;
+            print_stack();
+            return;
+          }
           if (stack.size() < 1)
           {
             mode = MODE::INSERT;
@@ -517,9 +544,14 @@ void loop()
         }
         else if (key == '3' || key == '6' || key == '9' || key == 'E')
         {
+          if (push_to_stack() == false)
+          {
+            mode = MODE::INSERT;
+            print_stack();
+            return;
+          }
           for (int i = 0; i < repeat; ++i)
           {
-            push_to_stack();
             long double result;
             if (stack.size() < 2)
             {
