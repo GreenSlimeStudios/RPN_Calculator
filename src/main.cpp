@@ -230,17 +230,22 @@ void print_const_set()
   display.fillScreen(ST77XX_BLACK);
   display.setCursor(5, 5);
   display.println("1:PI");
-  display.setCursor(70, 5);
+  display.setCursor(65, 5);
   display.println("2:e");
-  display.setCursor(130, 5);
-  display.println("3:p");
-  display.setCursor(190, 5);
-  display.println("4:G");
+  display.setCursor(125, 5);
+  display.println("3:me");
+  display.setCursor(185, 5);
+  display.println("4:p");
+  display.setCursor(5, 30);
+  display.println("5:G");
+  display.setCursor(65, 30);
+  display.println("6:ma");
 
   display.drawLine(60, 0, 60, 240, ST77XX_WHITE);
   display.drawLine(120, 0, 120, 240, ST77XX_WHITE);
   display.drawLine(180, 0, 180, 240, ST77XX_WHITE);
   display.drawLine(0, 25, 240, 25, ST77XX_WHITE);
+  display.drawLine(0, 50, 240, 50, ST77XX_WHITE);
 }
 
 void loop()
@@ -685,13 +690,19 @@ void loop()
           stack.push_back(PI);
           break;
         case '2':
-          stack.push_back(0.000000000000000000160217662);
+          stack.push_back(0.00000000000000000016);
           break;
         case '3':
-          stack.push_back(0.0000000000000000000000016726);
+          stack.push_back(0.00000000000000000000000000000091);
           break;
         case '4':
+          stack.push_back(0.00000000000000000000000167);
+          break;
+        case '5':
           stack.push_back(0.000000000066743);
+          break;
+        case '6':
+          stack.push_back(0.0000000000000000000000000066446573357);
           break;
 
         default:
