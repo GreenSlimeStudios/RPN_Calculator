@@ -19,7 +19,7 @@ Adafruit_ST7789 display = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
 const byte ROWS = 6; // four rows
 const byte COLS = 4; // three columns
 char keys[ROWS][COLS] = {
-    {'X', 'X', '^', 'D'},
+    {'W', 'G', '^', 'D'},
     {'X', 'X', 'v', '-'},
     {'F', '1', '2', '3'},
     {'S', '4', '5', '6'},
@@ -33,6 +33,9 @@ int repeat = 1;
 char pre_key = 'E';
 int index_offset = 1;
 
+std::vector<long double> params = {};
+std::string p_current = "";
+
 enum MODE
 {
   INSERT,
@@ -42,6 +45,8 @@ enum MODE
   REPEAT_SET,
   CONST_SELECT,
   GRAPH,
+  DISPLAY_GRAPH,
+  WZORY,
 };
 
 MODE mode = MODE::INSERT;
@@ -53,6 +58,64 @@ void print_splash()
 {
   display.fillScreen(ST77XX_BLACK);
   display.println("KARP CALCULATOR");
+}
+void print_graph_select()
+{
+  display.fillScreen(ST77XX_BLACK);
+  display.setCursor(0, 0);
+  for (int i = 0; i < params.size(); ++i)
+  {
+    std::string num = std::to_string(params[i]);
+    if (floor(params[i]) != params[i])
+    {
+      while (num[num.length() - 1] == '0' || num[num.length() - 1] == '.')
+      {
+        num = num.substr(0, num.size() - 1);
+      }
+    }
+    else
+    {
+      num = num.substr(0, num.size() - 7);
+    }
+    display.print(num.c_str());
+    if (i > 0)
+    {
+      display.print("X");
+    }
+    if (i > 1)
+    {
+      display.print("^");
+      display.print(i);
+    }
+    if (i != params.size() - 1)
+    {
+      display.print("+");
+    }
+  }
+  display.println();
+  display.print(p_current.c_str());
+}
+float calc_func(float x)
+{
+  float out = 0;
+  for (int i = 0; i < params.size(); ++i)
+  {
+    out += params[i] * pow(x, i);
+  }
+  return out;
+}
+float zoom = 10;
+void print_graph()
+{
+  display.fillScreen(ST77XX_BLACK);
+  display.drawLine(120, 0, 120, 240, ST77XX_WHITE);
+  display.drawLine(0, 120, 240, 120, ST77XX_WHITE);
+  for (int i = 0; i < 2400; ++i)
+  {
+    float x = ((float)i - 1200.0) / 10.0 / zoom;
+    float y = calc_func(x) * zoom;
+    display.drawPixel(i / 10, 120 - y, ST77XX_RED);
+  }
 }
 void setup()
 {
@@ -214,6 +277,20 @@ bool push_to_stack()
   }
   return true;
 }
+bool push_to_params()
+{
+  if (check_input(&p_current))
+  {
+    params.push_back(std::stold(p_current));
+    p_current = "";
+  }
+  else if (p_current != "")
+  {
+    stupid();
+    return false;
+  }
+  return true;
+}
 void print_repeat_set()
 {
   display.fillScreen(ST77XX_BLACK);
@@ -246,6 +323,14 @@ void print_const_set()
   display.drawLine(180, 0, 180, 240, ST77XX_WHITE);
   display.drawLine(0, 25, 240, 25, ST77XX_WHITE);
   display.drawLine(0, 50, 240, 50, ST77XX_WHITE);
+}
+void print_wzory()
+{
+  display.fillScreen(ST77XX_BLACK);
+  display.setCursor(0, 0);
+  display.println("V=2{pi}r/T");
+  display.println("B={mi0}nI/l - zwoj");
+  display.println("Fe=qE");
 }
 
 void loop()
@@ -414,6 +499,30 @@ void loop()
           {
             mode = MODE::CONST_SELECT;
             print_const_set();
+          }
+          else
+          {
+            mode = MODE::INSERT;
+            print_stack();
+          }
+          break;
+        case 'W':
+          if (push_to_stack())
+          {
+            mode = MODE::WZORY;
+            print_wzory();
+          }
+          else
+          {
+            mode = MODE::INSERT;
+            print_stack();
+          }
+          break;
+        case 'G':
+          if (push_to_stack())
+          {
+            mode = MODE::GRAPH;
+            print_graph_select();
           }
           else
           {
@@ -710,6 +819,98 @@ void loop()
         }
         mode = MODE::INSERT;
         print_stack();
+      }
+      else if (mode == MODE::WZORY)
+      {
+        switch (key)
+        {
+        case '^':
+          /* code */
+          break;
+        case 'v':
+          break;
+
+        default:
+          mode = MODE::INSERT;
+          print_stack();
+          break;
+        }
+      }
+      else if (mode = MODE::GRAPH)
+      {
+        if (key == '-')
+        {
+          if (p_current.substr(0, 1) == "-")
+          {
+            p_current = p_current.substr(1);
+          }
+          else
+          {
+            p_current = "-" + p_current;
+          }
+          print_graph_select();
+          return;
+        }
+        else if (key == 'D')
+        {
+          if (p_current.length() > 0)
+          {
+            p_current = p_current.substr(0, p_current.length() - 1);
+            print_graph_select();
+          }
+          return;
+        }
+        else if (key == '.')
+        {
+          if (p_current.find('.') == std::string::npos)
+          {
+            p_current += key;
+            print_graph_select();
+            Serial.println(key);
+          }
+        }
+        else
+        {
+          if (std::find(std::begin(valid_chars), std::end(valid_chars), key) != std::end(valid_chars))
+          {
+            p_current += key;
+          }
+          print_graph_select();
+          Serial.println(key);
+        }
+
+        switch (key)
+        {
+        case 'E':
+          push_to_params();
+          print_graph_select();
+          break;
+        case 'G':
+          params.clear();
+          p_current = "";
+          print_graph_select();
+          break;
+        case 'W':
+          mode = MODE::DISPLAY_GRAPH;
+          print_graph();
+          break;
+        default:
+          break;
+        }
+      }
+      else if (mode = MODE::DISPLAY_GRAPH)
+      {
+        switch (key)
+        {
+        case 'E':
+          mode = MODE::GRAPH;
+          print_graph_select();
+          break;
+
+        default:
+          print_graph();
+          break;
+        }
       }
     }
     pre_key = key;
