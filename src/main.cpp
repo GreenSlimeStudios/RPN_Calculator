@@ -20,10 +20,10 @@ const byte ROWS = 6; // four rows
 const byte COLS = 4; // three columns
 char keys[ROWS][COLS] = {
     {'W', 'G', '^', 'D'},
-    {'X', 'X', 'v', '-'},
-    {'F', '1', '2', '3'},
+    {'X', 'L', 'v', '-'},
+    {'F', '7', '8', '9'},
     {'S', '4', '5', '6'},
-    {'A', '7', '8', '9'},
+    {'A', '1', '2', '3'},
     {'J', '.', '0', 'E'}};
 byte colPins[COLS] = {14, 25, 26, 27};        // connect to the row pinouts of the keypad
 byte rowPins[ROWS] = {33, 22, 21, 4, 13, 12}; // connect to the column pinouts of the keypad
@@ -46,7 +46,9 @@ enum MODE
   CONST_SELECT,
   GRAPH,
   DISPLAY_GRAPH,
+  SET_GRAPH_ZOOM,
   WZORY,
+
 };
 
 MODE mode = MODE::INSERT;
@@ -95,6 +97,12 @@ void print_graph_select()
   display.println();
   display.print(p_current.c_str());
 }
+void print_graph_zoom()
+{
+  display.fillRoundRect(10, 10, 230, 30, 5, ST77XX_BLUE);
+  display.setCursor(15, 15);
+  display.print(p_current.c_str());
+}
 float calc_func(float x)
 {
   float out = 0;
@@ -105,17 +113,21 @@ float calc_func(float x)
   return out;
 }
 float zoom = 10;
+float x_offset = 0;
+float y_offset = 0;
 void print_graph()
 {
+  mode = MODE::DISPLAY_GRAPH;
   display.fillScreen(ST77XX_BLACK);
-  display.drawLine(120, 0, 120, 240, ST77XX_WHITE);
-  display.drawLine(0, 120, 240, 120, ST77XX_WHITE);
-  for (int i = 0; i < 2400; ++i)
+  display.drawLine(120 + x_offset, 0, 120 + x_offset, 240, ST77XX_WHITE);
+  display.drawLine(0, 120 + y_offset, 240, 120 + y_offset, ST77XX_WHITE);
+  for (int i = 0-(int)x_offset*10; i < 2400; ++i)
   {
     float x = ((float)i - 1200.0) / 10.0 / zoom;
     float y = calc_func(x) * zoom;
-    display.drawPixel(i / 10, 120 - y, ST77XX_RED);
+    display.drawPixel(i / 10 + x_offset, 120 - y + y_offset, ST77XX_RED);
   }
+  Serial.println("finito");
 }
 void setup()
 {
@@ -282,6 +294,20 @@ bool push_to_params()
   if (check_input(&p_current))
   {
     params.push_back(std::stold(p_current));
+    p_current = "";
+  }
+  else if (p_current != "")
+  {
+    stupid();
+    return false;
+  }
+  return true;
+}
+bool set_zoom()
+{
+  if (check_input(&p_current))
+  {
+    zoom = std::stold(p_current);
     p_current = "";
   }
   else if (p_current != "")
@@ -546,7 +572,7 @@ void loop()
           mode = MODE::INSERT;
           print_stack();
           break;
-        case '1':
+        case '7':
           for (int i = 0; i < repeat; ++i)
           {
             if (push_to_stack())
@@ -560,7 +586,7 @@ void loop()
             print_stack();
           }
           break;
-        case '2':
+        case '8':
           if (push_to_stack())
           {
             if (stack.size() > 0)
@@ -582,7 +608,7 @@ void loop()
           mode = MODE::INSERT;
           print_stack();
           break;
-        case '9':
+        case '3':
           if (push_to_stack())
           {
             if (stack.size() > 0)
@@ -643,7 +669,7 @@ void loop()
       }
       else if (mode == MODE::SHIFT)
       {
-        if (key == '1' || key == '2' || key == '4' || key == '5')
+        if (key == '7' || key == '8' || key == '4' || key == '5')
         {
           if (push_to_stack() == false)
           {
@@ -660,10 +686,10 @@ void loop()
           long double result;
           switch (key)
           {
-          case '1':
+          case '7':
             result = sin(stack[stack.size() - 1] * PI / 180);
             break;
-          case '2':
+          case '8':
             result = cos(stack[stack.size() - 1] * PI / 180);
             break;
           case '4':
@@ -706,13 +732,13 @@ void loop()
             }
             switch (key)
             {
-            case '3':
+            case '9':
               result = stack[stack.size() - 2] + stack[stack.size() - 1];
               break;
             case '6':
               result = stack[stack.size() - 2] - stack[stack.size() - 1];
               break;
-            case '9':
+            case '3':
               result = stack[stack.size() - 2] * stack[stack.size() - 1];
               break;
             case 'E':
@@ -836,7 +862,7 @@ void loop()
           break;
         }
       }
-      else if (mode = MODE::GRAPH)
+      else if (mode == MODE::GRAPH)
       {
         if (key == '-')
         {
@@ -892,27 +918,101 @@ void loop()
           break;
         case 'W':
           mode = MODE::DISPLAY_GRAPH;
+          Serial.println("printing graph");
           print_graph();
           break;
         default:
           break;
         }
       }
-      else if (mode = MODE::DISPLAY_GRAPH)
+      else if (mode == MODE::DISPLAY_GRAPH)
       {
+        float vec = (zoom>10)?(zoom/2):(10);
+        float prop = 1;
         switch (key)
         {
         case 'E':
           mode = MODE::GRAPH;
           print_graph_select();
           break;
-
-        default:
+        case '9':
+          prop = zoom / (zoom + zoom / 5);
+          y_offset += y_offset * prop/5;
+          x_offset += x_offset * prop/5;
+          zoom += zoom / 5;
           print_graph();
+          break;
+        case '6':
+          // if (zoom > )
+          prop = zoom / (zoom + zoom / 5);
+          y_offset -= y_offset * prop/5;
+          x_offset -= x_offset * prop/5;
+          zoom -= zoom / 5;
+          print_graph();
+          break;
+        case '^':
+          y_offset += vec;
+          print_graph();
+          break;
+        case '8':
+          y_offset -= vec;
+          print_graph();
+          break;
+        case 'L':
+          x_offset += vec;
+          print_graph();
+          break;
+        case '-':
+          x_offset -= vec;
+          print_graph();
+          break;
+        case 'v':
+          mode = MODE::SET_GRAPH_ZOOM;
+          p_current = std::to_string(zoom);
+          p_current.erase(p_current.find_last_not_of('0') + 1, std::string::npos);
+          p_current.erase(p_current.find_last_not_of('.') + 1, std::string::npos);
+          print_graph_zoom();
+          break;
+        default:
+          // print_graph();
           break;
         }
       }
+      else if (mode == MODE::SET_GRAPH_ZOOM)
+      {
+        if (key == '.')
+        {
+          if (p_current.find('.') == std::string::npos)
+          {
+            p_current += key;
+            print_graph_zoom();
+            Serial.println(key);
+          }
+        }
+        else if (std::find(std::begin(valid_chars), std::end(valid_chars), key) != std::end(valid_chars))
+        {
+          p_current += key;
+          print_graph_zoom();
+          Serial.println(key);
+        }
+        else if (key == 'D')
+        {
+          if (p_current.length() > 0)
+          {
+            p_current = p_current.substr(0, p_current.length() - 1);
+            print_graph_zoom();
+          }
+          return;
+        }
+        else if (key == 'E')
+        {
+          set_zoom();
+          mode = MODE::DISPLAY_GRAPH;
+          print_graph();
+        }
+      }
+      pre_key = key;
     }
-    pre_key = key;
   }
+  // Serial.println(mode);
 }
