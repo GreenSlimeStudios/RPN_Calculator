@@ -122,23 +122,61 @@ void print_graph()
   display.drawLine(120 + x_offset, 0, 120 + x_offset, 240, ST77XX_WHITE);
   display.drawLine(0, 120 + y_offset, 240, 120 + y_offset, ST77XX_WHITE);
   int distance = 4;
+  int long_lines = 1;
+  int long_lines_mod = 40;
   for (int i = 1; i < (int)((240 - x_offset) / zoom) + 1; ++i)
   {
+    long_lines = (int)(long_lines_mod / zoom);
+    if (long_lines < 1)
+    {
+      long_lines = 1;
+    }
+    if (i % long_lines == 0)
+    {
+      display.drawLine(120 + i * zoom + x_offset, 0, 120 + i * zoom + x_offset, 240, 0x39C8);
+    }
     distance = (i % 5 == 0) ? (7) : (3);
     display.drawLine(120 + i * zoom + x_offset, 120 - distance + y_offset, 120 + i * zoom + x_offset, 120 + distance + y_offset, ST77XX_WHITE);
   }
   for (int i = 1; i < (int)((240 + x_offset) / zoom) + 1; ++i)
   {
+    long_lines = (int)(long_lines_mod / zoom);
+    if (long_lines < 1)
+    {
+      long_lines = 1;
+    }
+    if (i % long_lines == 0)
+    {
+      display.drawLine(120 - i * zoom + x_offset, 0, 120 - i * zoom + x_offset, 240, 0x39C8);
+    }
     distance = (i % 5 == 0) ? (7) : (3);
     display.drawLine(120 - i * zoom + x_offset, 120 - distance + y_offset, 120 - i * zoom + x_offset, 120 + distance + y_offset, ST77XX_WHITE);
   }
   for (int i = 1; i < (int)((240 - y_offset) / zoom) + 1; ++i)
   {
+    long_lines = (int)(long_lines_mod / zoom);
+    if (long_lines < 1)
+    {
+      long_lines = 1;
+    }
+    if (i % long_lines == 0)
+    {
+      display.drawLine(0, 120 + i * zoom + y_offset, 240, 120 + i * zoom + y_offset, 0x39C8);
+    }
     distance = (i % 5 == 0) ? (7) : (3);
     display.drawLine(120 - distance + x_offset, 120 + i * zoom + y_offset, 120 + distance + x_offset, 120 + i * zoom + y_offset, ST77XX_WHITE);
   }
   for (int i = 1; i < (int)((240 + y_offset) / zoom) + 1; ++i)
   {
+    long_lines = (int)(long_lines_mod / zoom);
+    if (long_lines < 1)
+    {
+      long_lines = 1;
+    }
+    if (i % long_lines == 0)
+    {
+      display.drawLine(0, 120 - i * zoom + y_offset, 240, 120 - i * zoom + y_offset, 0x39C8);
+    }
     distance = (i % 5 == 0) ? (7) : (3);
     display.drawLine(120 - distance + x_offset, 120 - i * zoom + y_offset, 120 + distance + x_offset, 120 - i * zoom + y_offset, ST77XX_WHITE);
   }
