@@ -121,7 +121,28 @@ void print_graph()
   display.fillScreen(ST77XX_BLACK);
   display.drawLine(120 + x_offset, 0, 120 + x_offset, 240, ST77XX_WHITE);
   display.drawLine(0, 120 + y_offset, 240, 120 + y_offset, ST77XX_WHITE);
-  for (int i = 0-(int)x_offset*10; i < 2400; ++i)
+  int distance = 4;
+  for (int i = 1; i < (int)((240 - x_offset) / zoom) + 1; ++i)
+  {
+    distance = (i % 5 == 0) ? (7) : (3);
+    display.drawLine(120 + i * zoom + x_offset, 120 - distance + y_offset, 120 + i * zoom + x_offset, 120 + distance + y_offset, ST77XX_WHITE);
+  }
+  for (int i = 1; i < (int)((240 + x_offset) / zoom) + 1; ++i)
+  {
+    distance = (i % 5 == 0) ? (7) : (3);
+    display.drawLine(120 - i * zoom + x_offset, 120 - distance + y_offset, 120 - i * zoom + x_offset, 120 + distance + y_offset, ST77XX_WHITE);
+  }
+  for (int i = 1; i < (int)((240 - y_offset) / zoom) + 1; ++i)
+  {
+    distance = (i % 5 == 0) ? (7) : (3);
+    display.drawLine(120 - distance + x_offset, 120 + i * zoom + y_offset, 120 + distance + x_offset, 120 + i * zoom + y_offset, ST77XX_WHITE);
+  }
+  for (int i = 1; i < (int)((240 + y_offset) / zoom) + 1; ++i)
+  {
+    distance = (i % 5 == 0) ? (7) : (3);
+    display.drawLine(120 - distance + x_offset, 120 - i * zoom + y_offset, 120 + distance + x_offset, 120 - i * zoom + y_offset, ST77XX_WHITE);
+  }
+  for (int i = 1 - (int)x_offset * 10; i < 2400 - (int)x_offset * 10; ++i)
   {
     float x = ((float)i - 1200.0) / 10.0 / zoom;
     float y = calc_func(x) * zoom;
@@ -927,7 +948,8 @@ void loop()
       }
       else if (mode == MODE::DISPLAY_GRAPH)
       {
-        float vec = (zoom>10)?(zoom/2):(10);
+        // float vec = (zoom>10)?(zoom/2):(10);
+        float vec = 10;
         float prop = 1;
         switch (key)
         {
@@ -937,16 +959,16 @@ void loop()
           break;
         case '9':
           prop = zoom / (zoom + zoom / 5);
-          y_offset += y_offset * prop/5;
-          x_offset += x_offset * prop/5;
+          y_offset += y_offset * prop / 5;
+          x_offset += x_offset * prop / 5;
           zoom += zoom / 5;
           print_graph();
           break;
         case '6':
           // if (zoom > )
           prop = zoom / (zoom + zoom / 5);
-          y_offset -= y_offset * prop/5;
-          x_offset -= x_offset * prop/5;
+          y_offset -= y_offset * prop / 5;
+          x_offset -= x_offset * prop / 5;
           zoom -= zoom / 5;
           print_graph();
           break;
@@ -964,6 +986,15 @@ void loop()
           break;
         case '-':
           x_offset -= vec;
+          print_graph();
+          break;
+        case '7':
+          x_offset = 0;
+          y_offset = 0;
+          print_graph();
+          break;
+        case '3':
+          zoom = 10;
           print_graph();
           break;
         case 'v':
