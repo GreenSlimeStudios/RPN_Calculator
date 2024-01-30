@@ -206,6 +206,7 @@ void stupid()
   display.print("SYNTAX ERROR !!!");
   delay(500);
 }
+
 void print_stack()
 {
   display.fillScreen(ST77XX_BLACK);
@@ -317,6 +318,55 @@ void print_stack()
     display.print("r");
   }
   display.setCursor(0, cursorY);
+}
+int GCD(int x, int y)
+{
+  // Swaping variables
+  if (y < x)
+  {
+    x = x + y;
+    y = x - y;
+    x = x - y;
+  }
+  int gcd = 1;
+  for (int i = 1; i <= x; ++i)
+  {
+    if (x % i == 0 && y % i == 0)
+    {
+      gcd = i;
+    }
+  }
+  return gcd;
+}
+void display_fraction_stack()
+{
+  p_current = std::to_string(stack.back());
+  p_current.erase(p_current.find_last_not_of('0') + 1, std::string::npos);
+  p_current.erase(p_current.find_last_not_of('.') + 1, std::string::npos);
+  std::string result = "";
+  int one, two;
+  if (stack.back() != floorf(stack.back()))
+  {
+    std::string one_half = p_current.substr(0, p_current.find('.'));
+    std::string two_half = p_current.substr(p_current.find('.') + 1, p_current.length());
+    one = std::stoi(one_half + two_half);
+    two = pow(10, two_half.length());
+    int gcd = GCD(one, two);
+    one = one / gcd;
+    two = two / gcd;
+    result = std::to_string(one) + "/" + std::to_string(two);
+  }
+  else
+  {
+    result = p_current;
+  }
+  print_stack();
+  display.println(result.c_str());
+  // display.println(std::to_string(one).c_str());
+  // int width = (one > two) ? (std::to_string(one).length() * 11) : (std::to_string(two).length() * 11);
+  // display.drawLine(0, display.getCursorY() + 1, width, display.getCursorY() + 1, ST77XX_WHITE);
+  // display.setCursor(0, display.getCursorY() + 3);
+  // display.println(std::to_string(two).c_str());
 }
 char valid_chars[10] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
 bool check_input(std::string *cur)
@@ -470,9 +520,16 @@ void loop()
     {
       if (mode == MODE::INSERT)
       {
-        if (key == 'J' || key == 'X')
+        if (key == 'X' || key == 'G' || key == 'W')
         {
           return;
+        }
+        else if (key == 'J')
+        {
+          if (push_to_stack())
+          {
+            display_fraction_stack();
+          }
         }
         else if (key == '^')
         {
@@ -561,6 +618,27 @@ void loop()
           current += key;
           print_stack();
           Serial.println(key);
+        }
+      }
+      else if (mode == MODE::FUNCTION)
+      {
+        switch (key)
+        {
+        case 'E':
+          mode = MODE::INSERT;
+          print_stack();
+          if (push_to_stack() && stack.size() > 1)
+          {
+            if (floorf(stack.back()) == stack.back() && stack[stack.size() - 2] == floorf(stack[stack.size() - 2]))
+            {
+              int gcd = GCD((int)stack.back(), (int)stack[stack.size() - 2]);
+              display.println((std::to_string((int)stack[stack.size() - 2] / gcd) + "/" + std::to_string((int)stack.back() / gcd)).c_str());
+            }
+          }
+          break;
+
+        default:
+          break;
         }
       }
       else if (mode == MODE::ALPHA)

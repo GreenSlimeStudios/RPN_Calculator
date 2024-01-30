@@ -15,6 +15,7 @@ Calculator includes:
 - Executing the same operation multiple times thanks to the repeat function
 - Changing the positivity/negativity of the stacks sign
 - Scientific notation
+- Converting numbers to fractions
 - Some physical, chemical and mathematical constants
 - Some mathematical and physical formulas
 - Graphing quadratic and polynomial functions
@@ -26,7 +27,6 @@ To be implemented:
 ```
 - Other graphing functions like exponential functions
 - More constants and formulas
-- Add exact mode (for exaple 1/4 instead of 0.25)
 ```
 
 ## Hardware 
@@ -103,6 +103,8 @@ Alpha 'J' to go to the REPEAT CHANGING mode
 Alpha 'A' to reset repeat value
 Alpha 'G' to go to the GRAPH mode
 Alpha 'W' to go to the FORMULA mode
+Function 'E' to display x/y as a fraction
+Insert 'J' to display x as a fraction
 ```
 ### The Repeat
 Repeat is used to execute a thing many times or to change the behaviour of an action.
