@@ -206,7 +206,23 @@ void stupid()
   display.print("SYNTAX ERROR !!!");
   delay(500);
 }
-
+long double factorial(long double x)
+{
+  long double res = 1;
+  if (floorf(x) == x && x > 0)
+  {
+    for (int i = 1; i < x + 1; i++)
+    {
+      res *= i;
+    }
+  }
+  else
+  {
+    stupid();
+    return x;
+  }
+  return res;
+}
 void print_stack()
 {
   display.fillScreen(ST77XX_BLACK);
@@ -626,8 +642,12 @@ void loop()
         {
         case 'E':
           mode = MODE::INSERT;
+          if (!push_to_stack)
+          {
+            break;
+          }
           print_stack();
-          if (push_to_stack() && stack.size() > 1)
+          if (stack.size() > 1)
           {
             if (floorf(stack.back()) == stack.back() && stack[stack.size() - 2] == floorf(stack[stack.size() - 2]))
             {
@@ -806,7 +826,7 @@ void loop()
       }
       else if (mode == MODE::SHIFT)
       {
-        if (key == '7' || key == '8' || key == '4' || key == '5')
+        if (key == '7' || key == '8' || key == '4' || key == '5' || key == '1')
         {
           if (push_to_stack() == false)
           {
@@ -823,6 +843,9 @@ void loop()
           long double result;
           switch (key)
           {
+          case '1':
+            result = factorial(stack.back());
+            break;
           case '7':
             result = sin(stack[stack.size() - 1] * PI / 180);
             break;

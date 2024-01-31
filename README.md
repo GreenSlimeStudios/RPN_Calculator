@@ -9,6 +9,7 @@ Calculator includes:
 - The root of any kind
 - Logarithm's of any base
 - sin, cos, tg, ctg
+- factorials
 - Up to 100+ stacks
 - Cloning the latest stack
 - Moving stacks up and down
@@ -93,6 +94,7 @@ Shift '7' for converting x to sin(x)
 Shift '8' for converting x to cos(x)
 Shift '4' for converting x to tg(x)
 Shift '5' for converting x to sqrt(x) *(convert x to the root of the R's kind)*
+Shift '1' for converting x to x! - factorial of x
 Alpha '7' to duplicate the bottom layer *(duplicat R times)*
 Alpha '8' to change the positivity/negativity of x's sign
 Alpha '4' for converting x to log10(x) *(convert x to logR(x))*
