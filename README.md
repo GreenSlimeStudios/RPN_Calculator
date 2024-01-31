@@ -125,6 +125,41 @@ While in Insert mode press `'^'` and `'v'` to move a layer up and down. You can 
 Press `Alpha 'D'` to clear the stack.
 Press `Alpha 'E'` to delete the bottom layer.
 
+### Constants selection
+Press `Alpha '.'` to get to the const selection mode.
+You can move beteen pages with `'^'` and `'v'` keys.
+Select the constant with number keys.
+
+Press `'E'` to get back without selecting a constant.
+
+### Formula view
+Press `Alpha 'W'` to get to formula view mode.
+You can move beteen pages with `'^'` and `'v'` keys.
+
+Press `'E'` to get back.
+
+### Graphing mode
+Press `Aplha 'G'` to get to the graphing mode.
+type in a number and press `'E'` to expand the polynominal function.
+You can reset the values by pressing `'G'`.
+Once the function formula is completed press the `'W'` key to graph the function and get to graph view mode.
+
+Press `A` to go back to calculation mode.
+
+Once in graph view mode you have these available shortcuts:
+```
+'^' to move the camera upwards
+'8' to move the camera downwards
+'L' to move the camera to the left
+'-' to move the camera to the right
+'7' to move the camera to (0,0)
+'9' to zoom in
+'6' to zoom out
+'3' to reset the zoom to the default value
+'v' to set a specific zoom value ('D' to delete and 'E' to confirm)
+'E' to go back to formula modification graph mode
+```
+
 MANUAL NOT COMPLETE
 
 
