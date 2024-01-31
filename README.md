@@ -83,10 +83,11 @@ I will refer to the repeat value as `R`.
 I will refer to the currently typed number as `current`.
 If the action has a special behaviour when `R` is set, then it will be bolded at the end.
 ```
-Shift '9' for adding x to y and *(add R times)*
-Shift '6' for subtracting x from y and *(add R times)*
-Shift '3' for multiplying x by y and *(add R times)*
-Shift 'E' for pushing current to the stack
+Shift '9' for adding x to y *(add R times)*
+Shift '6' for subtracting x from y *(substact R times)*
+Shift '3' for multiplying x by y *(multiply R times)*
+Shift 'E' for dividing y by x *(divide R times)*
+Insert 'E' for pushing current to the stack
 Insert 'D' to remove latest character from current
 Alpha 'D' to clear the whole stack
 Alpha 'E' to remove x (when there is no current) or current
@@ -107,6 +108,8 @@ Alpha 'G' to go to the GRAPH mode
 Alpha 'W' to go to the FORMULA mode
 Function 'E' to display x/y as a fraction
 Insert 'J' to display x as a fraction
+Insert '^' to move the selected layer up
+Insert 'v' to move the selected layer down
 ```
 ### The Repeat
 Repeat is used to execute a thing many times or to change the behaviour of an action.
@@ -115,6 +118,12 @@ type in the value and confirm with `'E'`.
 
 The newly set value will appear in the lower left corner of the screen next to the active mode indicator with a `R`r format.
 To reset the repeat value press `'A'` two times (`Alpha 'A'`)
+
+### Manipulating the stack
+While in Insert mode press `'^'` and `'v'` to move a layer up and down. You can move a layer up and down until you start typing a new number or simply press `'E'`.
+
+Press `Alpha 'D'` to clear the stack.
+Press `Alpha 'E'` to delete the bottom layer.
 
 MANUAL NOT COMPLETE
 
