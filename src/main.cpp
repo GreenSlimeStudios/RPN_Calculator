@@ -652,7 +652,14 @@ void loop()
             if (floorf(stack.back()) == stack.back() && stack[stack.size() - 2] == floorf(stack[stack.size() - 2]))
             {
               int gcd = GCD((int)stack.back(), (int)stack[stack.size() - 2]);
-              display.println((std::to_string((int)stack[stack.size() - 2] / gcd) + "/" + std::to_string((int)stack.back() / gcd)).c_str());
+              if ((int)stack.back() / gcd == 1)
+              {
+                display.println(std::to_string((int)stack[stack.size() - 2] / gcd).c_str());
+              }
+              else
+              {
+                display.println((std::to_string((int)stack[stack.size() - 2] / gcd) + "/" + std::to_string((int)stack.back() / gcd)).c_str());
+              }
             }
           }
           break;
